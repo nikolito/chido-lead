@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <link rel="stylesheet" type="text/css" href="css/w3.css">
+    <link rel="stylesheet" type="text/css" href="css/w3-theme-dark-grey.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/base.js"></script>
+    <script>
+      var eval = 0;
+      let now = new Date();
+      var jikan= new Date();
+      jikan.setHours(now.getHours() + 2);
+      var hour = ('0' + jikan.getHours()).slice(-2);
+      var minute = ('0' + jikan.getMinutes()).slice(-2);
+      
+      function loadData() {
+        var nicknameVal = localStorage.getItem('nickname');
+        document.forms.f1.nickname.value = nicknameVal;
+        
+        var homeTimeVal = localStorage.getItem('homeTime');
+        
+        if (!homeTimeVal) {
+          document.forms.f1.homeTime.value = hour + ":" + minute;
+          localStorage.setItem('homeTime', hour + ":" + minute);
+        } else {
+          document.forms.f1.homeTime.value = localStorage.getItem('homeTime');
+        }
+
+        var busstopData = localStorage.getItem('busstop');
+
+        if (busstopData) {
+          var busstopArray = busstopData.split(",");
+          //重複除去
+          var ba = busstopArray.filter(function (x, i, self) {
+            return self.indexOf(x) === i;
+            });
+          //データセットし直し
+          localStorage.setItem('busstop',ba.join(','));
+          
+          ba.forEach(function(el) {
+            var ulNode = document.getElementById('bsList');
+            var liNode = document.createElement('li');
+            var buttonNode = document.createElement('button');
+            buttonNode.setAttribute('class', 'btn2i');
+            buttonNode.setAttribute('type', 'button');
+            buttonNode.setAttribute('onclick', 'deleteBsList(\'' + el + '\')');
+            var busstopText = document.createTextNode(el);
+            var bLabel = document.createTextNode("X");
+            buttonNode.appendChild(bLabel);
+            liNode.appendChild(busstopText);
+            liNode.appendChild(buttonNode);
+            ulNode.appendChild(liNode);
+          });
+      	}
+
+	      //あらかじめ設定した帰りのバス停セットから緯度経度情報をセット
+	      if (localStorage.getItem('busstop')) {
+		      var destsData = localStorage.getItem('busstop').split(',');
+					var destsLatLng = new Array();
+	      
+		      destsData.forEach(function(el) {
+			      let d1 = findBSLocation(el);
+			      //"stop_id","stop_name","stop_lat","stop_lon"
+			      
+			      destsLatLng.push(d1);
+		      });
+		      
+		      //console.log(destsLatLng);
+		      localStorage.setItem('busstopDetail', JSON.stringify(destsLatLng));
+		    }
+
+        var navicharaVal = localStorage.getItem('navichara');
+        document.forms.f1.navichara.value = navicharaVal;
+
+/*
+        var geoAcceptVal = localStorage.getItem('geoAccept');
+        document.forms.f1.geoAccept.value = geoAcceptVal;
+*/
+      }
+
+      function deleteBsList(busStr) {
+        if (confirm("「" + busStr + "」を消しますか？")) {
+          //localStrage busstopから削除
+          var busstopData = localStorage.getItem('busstop');
+          var busArray = busstopData.split(',');
+          var busArrayNew = new Array();
+          busArray.forEach(function(el){
+            if (el != busStr && el != "") {
+              busArrayNew.push(el);
+            }
+          });
+          location.reload();
+
+          if (localStorage.getItem("busstop") != "") {
+            localStorage.setItem("busstop", busArrayNew.join(","));
+          } else {
+            localStorage.removeItem("busstop");
+          }
+          location.reload();
+        }
+      }
+
+      function saveData() {
+        localStorage.setItem('nickname', document.forms.f1.nickname.value);
+        if (document.forms.f1.nickname.value == "") {
+          alert("お名前を入力してください。");
+        }
+
+        if (localStorage.getItem('busstop') == "" || localStorage.getItem('busstop') == null) {
+          alert("最寄りのバス停を選んでください。"); 
+        }
+
+        localStorage.setItem('homeTime', document.forms.f1.homeTime.value);
+        if (document.forms.f1.homeTime.value == "") {
+          alert("帰宅時間を入力してください。");
+        }
+
+        localStorage.setItem('navichara', document.forms.f1.navichara.value);
+        if (document.forms.f1.navichara.value == "") {
+          alert("ナビキャラを選んでください。"); 
+        }
+
+/*
+        localStorage.setItem('geoAccept', document.forms.f1.geoAccept.value);
+
+        if (document.forms.f1.geoAccept.value == "") {
+          ons.notification.confirm({
+            title: 'ちどりーど',
+            message: 'このアプリが統計や調査に利用する目的で、デバイスの位置情報を取得してもよいですか？',
+            callback: function(idx) {
+              switch(idx) {
+                case 0:
+                  localStorage.setItem('geoAccept', 'no');
+                  break;
+                case 1:
+                  localStorage.setItem('geoAccept', 'yes');
+                  break;
+              }
+            }
+          });
+        }
+*/
+
+        location.reload();
+
+        if (checkData()) {
+          alert('設定完了！');
+          window.location = 'do.html';
+        }
+      }
+
+      function clearData() {
+        // if (confirm("入力したデータを全て消しますか？")) {
+        //   localStorage.clear();
+        //   location.reload();
+        // }
+        if (confirm('入力したデータを全て消しますか？')) {
+          localStorage.clear();
+          location.reload();
+        }
+      }
+    </script>
+    <style>
+	    .btnGroup {
+		    position: fixed;
+		    margin-left: 10px;
+		    background-color: rgba(0,0,0,0.3);
+		    z-index: 2;
+	    }
+	    body,form {
+		    text-align: center;
+		    margin-left: auto;
+		    margin-right: auto;
+	    }
+	    h1 {
+		    margin: 1.5rem;
+	    }
+	    h2 {
+		    display: block;
+		    width: 100%;
+		    background-color: #d48c05;
+		    height: 1.5em;
+		    line-height: 1.5em;
+		    vertical-align: middle;
+		    font-weight: bold;
+	    }
+			input:invalid+span:after {
+			  position: absolute;
+			  content: '✖';
+			  padding-left: 5px;
+			  color: red;
+			}
+			
+			input:valid+span:after {
+			  position: absolute;
+			  content: '✓';
+			  padding-left: 5px;
+			  color: green;
+			}
+    </style>
+    <title>設定</title>
+</head>
+<body onload="loadData();">
+	<div class="btnGroup">
+	  <button onclick="goHomePage();">戻る</button>
+	</div>
+
+  <h1>設定</h1>
+  
+  <form name="f1">
+	  <h2>お名前</h2>
+    <div class="labelbox">
+      <input name="nickname" placeholder="お名前" type="text" required>さん
+    </div>
+
+    <h2>帰りのバス停</h2>
+    <div class="labelbox">
+    	（3ヶ所まで）
+      <input class="btn2" type="button" onclick="goBusstopsPage();" value="バス停選択">
+      <h3>設定したバス停リスト</h3>
+      <ul id="bsList"></ul>
+    </div>
+
+    <h2>家に帰りたい時間</h2>
+    <p>※現在時刻より後〜23:59までは「今日」、現在時刻より前は「明日」の時刻表を検索します。</p>
+    <div class="labelbox">
+      <input name="homeTime" type="time" min="0:00" max="23:59"  pattern="[0-9]{2}:[0-9]{2}" placeholder="hh:mm" required>ごろ
+      <span class="validity"></span>
+    </div>
+
+  	<h2>お好みのナビキャラ</h2>
+    <div class="labelbox">
+      <input name="navichara" id="n1" type="radio" value="n1" checked/>
+      <label for="n1">
+      	<figure>
+	      	<img class="chara" src="img/n1.png">
+	      	<figcaption>キャラ1（ママ）</figcaption>
+      	</figure>
+      </label>
+      <br>
+      <input name="navichara" id="n2" type="radio" value="n2"/>
+      <label for="n2">
+      	<figure>
+	      	<img class="chara" src="img/n2.png">
+	      	<figcaption>キャラ２（バスイケメン）</figcaption>
+      	</figure>
+      </label>
+    </div>
+
+<!--
+    <div class="labelbox">
+      <label for="geoAccept">情報の取得・利用</label>
+      <p>このアプリがデバイスの位置情報を取得・利用してもよいですか？</p>
+      <input name="geoAccept" type="radio" value="yes" checked>はい
+      <input name="geoAccept" type="radio" value="no">いいえ
+    </div>
+-->
+
+    <input class="btn" id="save" type="button" value="設定する" onclick="saveData();">
+    <input class="btn2" id="clear" type="button" value="クリア" onclick="clearData();">
+  </form>
+  
+  </div>
+</body>
+</html>

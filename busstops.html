@@ -1,0 +1,209 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+  <link rel="stylesheet" type="text/css" href="css/w3.css">
+  <link rel="stylesheet" type="text/css" href="css/w3-theme-dark-grey.css">
+  <link rel="stylesheet" href="css/leaflet.css" />
+  <script src="js/leaflet.js"></script>
+  <link rel="stylesheet" href="css/L.Icon.Pulse.css" />
+  <script type="text/javascript" src="js/L.Icon.Pulse.js"></script>
+  <script type="text/javascript" src="js/Leaflet.Icon.Glyph.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <script type="text/javascript" src="js/base.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/leaflet-search.min.css">
+  <script src="js/leaflet-search.min.js"></script>
+
+  <style>
+    html, body  {
+      width: 100%;
+      height: 100%;
+      padding: 0px;
+      margin: 0px;
+    }
+    
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .search-input {
+	    color: #000;
+    }
+    a {
+	    color: #FFF;
+    }
+    a:hover {
+	    color: orange;
+    }
+  </style>
+
+  <script>
+    //バス停検索画面をボタンで切り替える
+    var letters = ['あ','い','う','え','お','か','き','く','け','こ','が','ぎ','ぐ','げ','ご','さ','し','す','せ','そ','ざ','じ','ず','ぜ','ぞ','た','ち','つ','て','と','だ','ぢ','づ','で','ど','な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ','ば','び','ぶ','べ','ぼ','ぱ','ぴ','ぷ','ぺ','ぽ','ま','み','む','め','も','や','ゆ','よ','ら','り','る','れ','ろ','わ'];
+
+    function show50on() {
+      var i = 0;
+      var j = 1;
+      var aiueo = '';
+      var link = '';
+      var bsname = '';
+      var bsnameKanji = '';
+      var bsnameHiragana = '';
+      var space = '';
+      var top = '<p><a href="#top"><i class="fas fa-angle-double-up"></i></a></p>';
+
+      //csvからバス停読みデータ（translations.txt）取る
+      var data = csvToHiraganaArray("busData/translations.txt");
+      //配列をひらがな順でソートする
+      sortByCol(data,2);
+
+      while (i < letters.length) {
+        if (j % 5 == 0) {
+          space = '<br>';
+        } else {
+          space = '';
+        }
+
+        aiueo = aiueo + '<a class="btn50on" href="#' + letters[i] + '">' + letters[i] + '</a>' + space;
+
+        var cn = 0;
+        while (cn < data.length) {
+          if (data[cn][0].match(/\(/) == null) { //かっこ付きバス停を省く
+            bsnameKanji = data[cn][0].replace(/\"/g,'');
+            bsnameHiragana = data[cn][2].replace(/\"/g,'');
+
+            if (bsnameHiragana.slice(0,1) == letters[i]) {
+              bsname = bsname + '<button class="btn2Stop" name="bstopname" onclick="confirmBSPlace(\'' + bsnameKanji + '\');">' + bsnameKanji + '（' + bsnameHiragana + '）' + '</button><br>';
+            }
+          }
+          cn++;
+        }
+
+        link = link + '<div class="bsNamelist"><a name="' + letters[i] + '"></a><h2>'+ letters[i] + '</h2>' + bsname + '</div>' + top;
+        bsname = '';
+        i++;
+        j++;
+      }
+      
+      document.getElementById("displaySpace").insertAdjacentHTML('afterbegin', aiueo + link);
+    }
+    
+    function confirmBSPlace(bsStr) {
+      var busstops = localStorage.getItem("busstop"); //コンマ区切りのデータ
+      
+      if (busstops != null && busstops.split(',').length == 3) {
+        alert("登録できるバスは3つまでです。帰りのバス停をどちらか消してから登録しなおしてください。");
+        goShirahuPage();
+      } else {
+        if (confirm("このバス停「" + bsStr + "」にしますか？")) {
+          //ホームバス停を登録
+          if (busstops == "" || busstops == null) {
+            localStorage.setItem("busstop", bsStr);
+          } else {
+            busstops = busstops + "," + bsStr;
+            localStorage.setItem("busstop", busstops);
+          }
+          goShirahuPage();
+        }
+      }
+    }
+
+    function showMap() {
+      document.getElementById("displaySpace").textContent = '';
+
+      //OpenStreetMapをロード
+      var mymap = L.map('map');
+ 
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    		maxZoom: 18,
+    		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
+    	}).addTo(mymap);
+    	
+    	var searchLayer = new L.LayerGroup();
+			mymap.addLayer(searchLayer);
+			
+			var controlSearch = new L.Control.Search({
+				position:'topleft',
+				layer: searchLayer,
+				zoom: 15,
+				initial: false,
+				autoType: false,
+				marker: L.circleMarker([0,0],{radius:30})
+			});
+			
+     	mymap.addControl(controlSearch);
+     	
+ 
+      function setBusLocation(){
+				const lat  = 33.264007;//JR佐賀駅
+				const lng = 130.296483;
+				
+				mymap.setView([lat, lng], 13);
+				
+				var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'#1199fb'});
+				L.marker([lat, lng],{icon: pulsingIcon, zIndexOffset: 10000}).addTo(mymap)
+				  .bindPopup("<p>JR佐賀駅</p>").openPopup();
+				
+				var iconglyph = L.icon.glyph({prefix: 'fa',glyph: 'bus'});
+				
+        //csvからバス停読みデータ（translations.txt）取る
+        var hiragana = csvToHiraganaArray("busData/translations.txt");
+        var hiragana2 = new Array();
+        
+        hiragana.forEach(function(el) {
+	        if (el[0].match(/\(/) == null) {
+		        hiragana2.push([el[0].replace(/\"/g,''),el[2].replace(/\"/g,'')]);
+	        }
+        });
+	      //console.log(hiragana2);
+        
+
+				//バス停を入力
+				//stops.txt読込
+				var data = makeArrayForSimpleBusstops(csvToArray("busData/stops.txt"));
+				let cn = 0;
+				
+				while (cn < data.length) {
+				  let latBs = data[cn][2].replace(/\"/g,'');
+				  let lngBs = data[cn][3].replace(/\"/g,'');
+				  var hyochu = data[cn][1].replace(/\"/g,'');
+				  var yomi;
+				  
+				  hiragana2.find(function(el){
+					  if (el[0] == hyochu) {
+						  yomi = el[1];
+					  	return yomi;						  
+					  }
+				  })
+				  
+				  L.marker([latBs,lngBs],{icon: iconglyph, title: hyochu})
+				  	
+				  	.addTo(searchLayer)
+				  	.bindPopup("<p>"+ hyochu + '<br>（' + yomi + '）' + '</p><button type="button" style="color: blue;" onclick="confirmBSPlace(\'' + hyochu + '\');">クリックして場所を決定</button>');
+				  
+				  
+
+				  cn++;
+				}
+      }
+      setBusLocation();
+    }
+  </script>
+</head>
+<body>
+	<div class="btnGroup">
+	  <button onclick="goShirahuPage();">戻る</button>
+	  <button onclick="show50on();">読み</button>
+	  <button onclick="showMap();">地図</button>
+	</div>
+  <a name="top"></a>
+  <div id="displaySpace">
+    <p>上のボタンを押して、自宅最寄りのバス停を選んでください。</p>
+  </div>
+  <div id="map"></div>
+</body>
+</html>

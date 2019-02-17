@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Cache-Control" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/w3.css">
+    <link rel="stylesheet" type="text/css" href="css/w3-theme-dark-grey.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/base.js"></script>
+    <script src="js/watch-position.js"></script>
+    <script>
+      //1.飲み屋の位置をlocalStorageにセット
+      //2.経路サーチ
+      
+      var timerSearchRoute = setInterval(searchRoute,10000);
+
+    </script>
+    <style>
+			#velocity {
+				display: inline-flex;
+			}
+			a {
+				text-decoration: none;
+			}
+			a:hover {
+				color: yellow;
+			}
+			.fa-sync-alt {
+		    -webkit-animation: spin 1.5s linear infinite;
+		    -moz-animation: spin 1.5s linear infinite;
+		    -ms-animation: spin 1.5s linear infinite;
+		    -o-animation: spin 1.5s linear infinite;
+		    animation: spin 1.5s linear infinite;
+			}
+			
+			@-webkit-keyframes spin {
+				0% {-webkit-transform: rotate(0deg);}
+				100% {-webkit-transform: rotate(360deg);}
+			}
+			@-moz-keyframes spin {
+				0% {-moz-transform: rotate(0deg);}
+				100% {-moz-transform: rotate(360deg);}
+			}
+			@-ms-keyframes spin {
+				0% {-ms-transform: rotate(0deg);}
+				100% {-ms-transform: rotate(360deg);}
+			}
+			@-o-keyframes spin {
+				0% {-o-transform: rotate(0deg);}
+				100% {-o-transform: rotate(360deg);}
+			}
+			@keyframes spin {
+				0% {transform: rotate(0deg);}
+				100% {transform: rotate(360deg);}
+			}
+			#intro {
+				margin-left: 1.5em;
+				margin-right: 1em;
+				margin-top: auto;
+				margin-bottom: auto;
+				text-align: left;
+			}
+    </style>
+    <title>バスチェッカー</title>
+</head>
+<body onload="searchRoute(); checkAlarm();">
+	<div class="btnGroup">
+	  <button onclick="window.location = 'do.html';">バスボタン</button>
+	  <span class="velocity">速度<div id="velocity"></div>m/s</span>
+	  <button onclick="goVehicleLocationPage();">現在地情報</button>
+	</div>
+	
+  <!--出発−到着-バス停のリスト-->
+	<div id="demo"></div>
+  <div id="result"><div id="intro"><p class="smallerSign"><span class="em">アラーム</span>：発車10分前からお知らせします。<br><span class="em">経路</span>：各パネルをクリックしてください。<br><span class="em">乗車モード</span>：この画面を開いた状態でバスに乗車し、5m/sec以上になると乗車モード画面に切り替わります。<br><span class="em">画面更新</span>：以下のボタンを押してください。</p></div></div>
+  <div id="display"><button class="btn" type="button" onclick="goNoPage2();"><i class="fas fa-sync-alt" aria-hidden="true"></i></button></div>
+</body>
+</html>

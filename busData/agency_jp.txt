@@ -1,0 +1,3 @@
+﻿"agency_id","agency_official_name","agency_zip_number","agency_address","agency_president_pos","agency_president_name"
+"3000020412015","佐賀市交通局","8400812","佐賀県佐賀市愛敬町4番23号","佐賀市自動車運送事業管理者","伊東　博己"
+"7300001004995","祐徳バス株式会社","8491311","佐賀県鹿島市大字高津原45番地1","代表取締役","松尾　文敏"

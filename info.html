@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <script type="text/javascript" src="js/base.js"></script>
+    <script src="/js/particles.min.js"></script>
+    <style>
+	    html,
+			body {
+				margin: 0;
+				padding: 0;
+			  text-align: center;
+			  font-size: larger;
+			  line-height: 1.8rem;
+			  font-family: -apple-system, BlinkMacSystemFont,"Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+			  color: #FFF;
+			  letter-spacing: 1.5px;
+			  background-color: #000;
+			  background-image: url('/img/stars.png');
+			}
+			canvas {
+				width:100%;
+				height:100%;
+			}
+	    .background {
+			  position: absolute;
+			  display: block;
+			  z-index: 0;
+			  top: 0;
+			  left: 0;
+			  right: 0;
+			  bottom: 0;
+			}
+			h1 {
+				margin-top: 60px;
+			}			
+			h1,h2,h3 {
+			  text-align: center;
+			  font-weight: bold;
+			}
+	    h2 {
+		    display: block;
+		    width: 100%;
+		    background-color: #d48c05;
+		    height: 1.5em;
+		    line-height: 1.5em;
+		    vertical-align: middle;
+		    font-weight: bold;
+	    }
+	    p {
+		    display: block;
+		    width: 80%;
+		    margin-left: auto;
+		    margin-right: auto;
+		    text-align: left;
+	    }
+	    ul {
+		    list-style-image: url('/img/bus16x16.png');
+		    vertical-align: middle;
+	    }
+	    ul li {
+		    width: 80%;
+		    margin-left: auto;
+		    margin-right: auto;
+		    text-align: left;
+	    }
+	    a {
+		    color: aqua;
+	    }
+	    button.ret {
+		    display: block;
+		    position: fixed;
+		    top: 10px;
+		    left: 10px;
+		    height: 10;
+		    z-index: 5;
+		    font-size: medium;
+		    color: orange;
+		    border-radius: 3px;
+		    border-style: solid 1px;
+		    border-color: orange;
+		    background-color: rgba(0,0,0,0.5);
+	    }
+	    button.leaflet {
+		    display: block;
+		    position: fixed;
+		    top: 10px;
+		    right: 10px;
+		    height: 10;
+		    z-index: 5;
+		    font-size: medium;
+		    color: orange;
+		    border-radius: 3px;
+		    border-style: solid 1px;
+		    border-color: orange;
+		    background-color: rgba(0,0,0,0.5);
+	    }
+			.em {
+			  color: yellow;
+			  font-weight: bold;
+			}
+			img {
+				z-index: 100;
+			}
+    </style>
+    <script>
+      function locatePage() {
+        if (checkData()) {
+          window.location = "do.html";
+        }
+      }
+			
+      function showParticles() {
+	      Particles.init({
+				  selector: '.background',
+				  sizeVariations: 4,
+				  color: ['#fff', 'orange', 'yellow', 'lightblue'],
+				  speed: 0.3
+				});
+			}
+    </script>
+    <title>ちどりーど</title>
+</head>
+<body onload="showParticles();">
+	<button class="ret" onclick="goHomePage();">戻る</button>
+	<button class="leaflet" onclick="window.location = 'leaflet.pdf';">紹介リーフレット</button>
+	
+  <h1>説明</h1>
+  <h2>アプリの概要</h2>
+  <p>
+	  <div align="center"><img src="/img/button1.png" width="100"/></div>
+		飲食店で呑み始める時に、上の<span class="em">バスボタン</span>を押下しておく」だけで、
+	  <ul>
+		  <li><span class="em">飲食店最寄りの</span>バスの発車時間や経路をお知らせ♪</li>
+		  <li>バスに乗った後も、<span class="em">バス位置と通過バス停をリアルタイム確認／降りるタイミング</span>をお知らせ♪</li>
+	  </ul>
+	  好きなだけバスボタンを押してください♪
+	</p>
+	<p>ちなみにモバイル端末のホーム画面にアイコンを登録すると、（特にiOSで）使いやすくなります。</p>
+	<div align="center"><img src="/img/homeicon.png" width="100" align="center"/></div>
+	
+<h2>特徴</h2>
+<p>
+	<ul>
+		<li>ボタンを押すだけのカンタン操作！スマホでもPCでもチェック！</li>
+		<li><span class="em">ボタン押下した現在位置</span>から、<span class="em">帰宅時刻にあわせた</span>最適なバスルート（旅程）を自動検索</li>
+		<li>あらかじめバス停付近の飲食店やバス停のリアルタイム時刻表をチェックできます。</li>
+		<li>バスに乗車してからも、<span class="em">バスの速度を検知して、現在地と通過バス停を確認できる画面に切り替わります。</span></li>
+		<li>時々ナビキャラが出てきて、<span class="em">帰る時間やバス停までの距離を教えてくれます。</span></li>
+	</ul>
+</p>
+
+
+<h2>1. 設定</h2>
+<p>はじめに、カンタン操作のため、アプリに次の項目を設定しておきます。
+	<ul>
+		<li>お名前</li>
+		<li>自宅最寄りのバス停</li>
+		<li>帰宅したい時刻</li>
+		<li>ナビキャラ</li>
+	</ul>
+これらの情報はこのアプリの動作のためだけに使います。</p>
+
+<h2>2. 「どっ？」ボタン</h2>
+<p>設定が終わると、直下に「どっ？」のボタンが現れます。それを押すと<span class="em">バスボタン</span>が現れます。<br>
+<span class="em">滞在する場所で</span>ボタンを押してください。<br>
+	ボタンを押した場所から帰りのバス停までの経路が現れます。<br>
+各経路画面を押すと、詳細が現れます。さらに地図で経路の確認ができます。</p>
+
+<h2>3. 乗車モード</h2>
+<p>経路画面のままバスに乗ると、5m/sec（18km/h）以上の速度を検知し、<span class="em">「乗車モード」</span>画面に切り替わります。<br>
+	乗車モードでは、現在乗っているバスと通過するバス停、予定時刻を確認できます。さらに、到着バス停と乗車バスとの距離に応じてアラームを出します。
+</p>
+
+
+<h2>デモモード</h2>
+<p>このアプリでは佐賀県下のバスデータと位置情報を扱うため、それらのデータ範囲外からアクセスした場合、あるいは位置情報がオフである場合、<span class="em">「デモモード」</span>に切り替わります。デモモードでは、<span class="em">現在位置はJR佐賀駅</span>とみなして動作します。<span class="em">乗車モードのデモ</span>では、実際に佐賀で乗車した状態で遷移する画面に限りなく近い状態でデモ表示を行います。</p>
+
+
+<h2>Web版での特記事項</h2>
+<p>
+	<ul>
+		<li><span class="em">現在地情報</span>を利用できる機器とネット環境をご利用ください。</li>
+		<li>本アプリのアイコンをiOS端末のホーム画面に追加すると、フル画面で操作し、ブラウザとは別のプロセスで動作するようになります。特に小さな画面をお使いの方にオススメ！</li>
+		<li>Webブラウザでは、仕様のため、現在地取得とアラーム音を<span class="em">「許可」する環境設定</span>が必要です。</li>
+		<li>このサービスは2019年3月末までの期間限定です。</li>
+	</ul>
+</p>
+
+<h2>個人情報の取り扱い</h2>
+<p>所有者の個人情報は取得しません。端末の位置・速度情報は端末内部ストレージに一時的に取得します。全てを消去する場合は、<a href="shirahu.html">「設定する」画面</a>の下部にある、<span class="em">「クリア」</span>ボタンを押せばすべて消去できます。</p>
+
+<h2>謝辞</h2>
+<p>このアプリの作成にあたり、以下のオープンデータ、オープンソースソフトウェア、フリー素材を使用しました。</p>
+<ul>
+  <li><a href="http://opendata.sagabus.info/" target="_blank">佐賀県・バス情報オープンデータ</a></li>
+  <li><a href="http://www.opentripplanner.org" target="_blank">OpenTripPlanner</a></li>
+  <li><a href="https://leafletjs.com" target="_blank">Leaflet</a></li>
+  <li><a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a></li>
+  <li><a href="https://maoudamashii.jokersounds.com/" target="_blank">魔王魂</a>・音素材の一部</li>
+  <li><a href="https://commons.nicovideo.jp/" target="_blank">ニコニ・コモンズ</a>・音素材の一部</li>
+  <li>小石克様・ナビキャラ画像など</li>
+  <li>牛島清豪様・バスアイコン</li>
+</ul>
+
+<p>このアプリの作成にあたり、以下の商用サービス（試用、フリー版、クーポン券）を使用しました。</p>
+<ul>
+  <li><a href="https://ja.monaca.io" target="_blank">monaca（試用版）</a></li>
+  <li><a href="https://api.gnavi.co.jp/api/" target="_blank">ぐるなびAPI</a></li>
+  <li><a href="https://cloud.sakura.ad.jp" target="_blank">さくらのクラウド</a></li>	
+</ul>
+
+
+<h2>さいごに</h2>
+<p>このアプリの作成者はチーム酔人@<a href="https://code4saga.org" target="_blank">Code for Saga</a>です。<br>
+	プログラム実装者は吉賀@チーム酔人です。</p>
+
+
+<canvas class="background"></canvas>
+<script src="/js/particles.min.js"></script>
+</html>

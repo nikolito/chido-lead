@@ -1,0 +1,618 @@
+/* ちどりーどスタイル */
+body {
+  text-align: center;
+  font-size: larger;
+  line-height: 1.8rem;
+  font-family: -apple-system, BlinkMacSystemFont,"Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  color: #FFF;
+  letter-spacing: 1.5px;
+  background-color: #000;
+}
+
+h1,h2,h3 {
+  text-align: center;
+  font-weight: bold;
+}
+
+#titled {
+  margin: 0.5em;
+  display:block;
+  padding: 0.5em;
+  line-height: auto;
+  font-size: xx-large;
+  color: #f39800;
+  text-align: center;
+  background-color: rgba(13, 13, 13, 0.8); /*ボタン色*/
+  border-radius: 10px; /*角丸*/
+  border: solid;
+  border-color: #f39800;
+}
+
+.busButton img {
+	height: 80vh;
+}
+
+.boxinfo {
+  margin: 1em;
+  display:block;
+  padding: 0.5em;
+  line-height: auto;
+  font-size: smaller;
+  color: #fff;
+  text-align: left;
+  background-color: rgba(13, 13, 13, 0.8); /*ボタン色*/
+  border-radius: 10px; /*角丸*/
+  border: dotted;
+  border-color: #f39800;
+}
+
+form {
+  text-align: center;
+}
+
+button {
+  text-align: center;
+  color: #f39800;
+}
+
+label {
+  margin: 3px;
+  padding: 8px;
+  text-align: center;
+}
+
+.labelbox {
+	position: relative;
+	text-align: center;
+	width: 95%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.labelbox input[type='text'] {
+	font: 15px/24px sans-serif;
+	box-sizing: border-box;
+	width: 80%;
+	margin: 8px 0;
+	padding: 0.3em;
+	transition: 0.3s;
+	border: 1px solid orange;
+	border-radius: 4px;
+	outline: none;
+}
+
+.labelbox input[type='text']:focus {
+	border-color: orange;
+}
+
+.labelbox input[type="radio"] {
+  display: none;
+}
+
+.labelbox input[type="radio"]:checked + label img {
+  background: orange;
+}
+
+ul, ol {
+  padding: 0;
+  position: relative;
+}
+
+ul li {
+  color: black;
+  font-size: calc(80% + 0.5vw);
+  /*width: 80vw;*/
+  /*box-sizing: border-box;*/
+  border-left: solid 8px orange;/*左側の線*/
+  background: whitesmoke;/*背景色*/
+  margin-bottom: 5px;/*下のバーとの余白*/
+  line-height: 3rem;
+  border-radius: 0 15px 15px 0;/*右側の角だけ丸く*/
+  /*padding: 0.2em;*/
+  list-style-type: none!important;
+}
+
+ol li {
+	display: block;
+}
+
+#b1,#breturn {
+  margin: 3rem;
+}
+
+.btn {
+  margin: 1rem;
+  display:block;
+  width: 90%;
+  height:3rem;
+  line-height: auto;
+  font-size: 2rem;
+  color: #FFF;
+  text-decoration: none;
+  text-align: center;
+  background-color: rgba(255, 167, 0, 0.8); /*ボタン色*/
+  border-radius: 5px; /*角丸*/
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn2 {
+  margin: 1rem;
+  display:block;
+  width: 90%;
+  height:3rem;
+  line-height: auto;
+  font-size: 2rem;
+  color: #f39800;
+  text-decoration: none;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.62); /*ボタン色*/
+  border-radius: 5px; /*角丸*/
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn50on {
+  margin: 5px;
+  padding: 4px;
+  display:inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: middle;
+  font-size: 2rem;
+  color: #f39800;
+  text-decoration: none;
+  text-align: center;
+  background-color: #201f1d; /*ボタン色*/
+  border-radius: 5px; /*角丸*/
+  border-color: #fff;
+}
+
+.btn2i {
+  margin: 0.5rem;
+  display:inline-block;
+  height: 2rem;
+  vertical-align: middle;
+  line-height: 2rem;
+  font-size: 1rem;
+  color: #f39800;
+  text-decoration: none;
+  text-align: center;
+  background-color: #201f1d; /*ボタン色*/
+  border-radius: 5px; /*角丸*/
+  float: right;
+}
+
+.btn2Stop {
+  margin: 0.5rem;
+  display:inline-block;
+  height: 2rem;
+  vertical-align: middle;
+  line-height: 2rem;
+  font-size: 1rem;
+  color: #f39800;
+  text-decoration: none;
+  text-align: center;
+  background-color: #201f1d; /*ボタン色*/
+  border-radius: 5px; /*角丸*/
+}
+
+.bsNamelist {
+  margin: 1rem;
+  text-align: left;
+}
+
+.bsNamelist h2 {
+  text-align: center;
+}
+
+#shirahu2 {
+  margin: 5px;
+}
+
+.segment2 {
+  padding: 2px;
+  line-height: 1.2rem;
+  display: block;
+  font-size: small;
+}
+
+.focus {
+  /*-webkit-transition: all 3s ease;
+	transition: all 3s ease;
+  -webkit-transform: scale(1.2,1.2);
+	transform: scale(1.2,1.2);*/
+	width: 80%;
+	height: 80%; 
+  align-content: center;
+  vertical-align: middle;
+  animation: bg1 0.5s ease 0s 8 alternate;
+}
+
+@keyframes bg1 {
+  0% {width: 100%; height: 100%; background-color: aqua;}
+100% {width: 100%; height: 100%; transform: scale(1.2); background-color: blue;}
+}
+
+.messages {
+  position: absolute;
+  bottom: 0vh;
+  color: #fff;
+  background: rgba(0,0,0,.6);
+  margin: 0;
+  padding:0;
+  width: 100%;
+  height: 4rem;
+  font-size: 3rem;
+  line-height: 4rem;
+  vertical-align: text-bottom;
+  text-align: center;
+  z-index: 2;
+}
+
+.messagesNickname {
+  position: absolute;
+  top: 0vw;
+  color: #fff;
+  background: rgba(0,0,0,.6);
+  margin: 0;
+  padding:0;
+  width: 100%;
+  height: 4rem;
+  font-size: 3rem;
+  line-height: 4rem;
+  vertical-align: text-bottom;
+  text-align: center;
+  z-index: 2;
+}
+
+.messages2 {
+  position: absolute;
+  bottom: 0px;
+  color: #fff;
+  background: rgba(0,0,0,.6);
+  margin: 0;
+  padding:0;
+  width: 100%;
+  height: 4rem;
+  font-size: 3rem;
+  line-height: 4rem;
+  vertical-align: text-bottom;
+  text-align: center;
+  z-index: 2;
+}
+
+.messagesNickname2 {
+  position: relative;
+  top: 0px;
+  color: #fff;
+  background: rgba(0,0,0,.6);
+  margin: 0;
+  padding:0;
+  width: 100%;
+  height: 4rem;
+  font-size: 3rem;
+  line-height: 4rem;
+  vertical-align: text-bottom;
+  text-align: center;
+  z-index: 2;
+}
+
+.chara {
+  display: inline-block;
+  margin: 10;
+  width: 50%;
+}
+
+.bigNum {
+  font-size: x-large;
+  color: lightblue;
+}
+
+.smallerSign {
+  display: block;
+  font-size: smaller;
+  line-height: 1.2rem;
+}
+
+.routeSign {
+  display: block;
+  font-size: medium;
+  vertical-align: middle;
+  color: lightblue;
+}
+
+.innerSign {
+  display: inline-block;
+  font-size: smaller;
+	border: 1 solid #FFF;
+	z-index:10;
+}
+
+.busstopSign {
+  display: inline-block;
+  font-size: larger;
+  color: rgb(255, 217, 0);
+}
+
+.timeTable {
+  display: block;
+  background-color: #333;
+  width: 100%;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-radius: 10px;
+}
+
+.timeTable2 {
+  display: inline-block;
+  background-color: rgba(255, 0, 0, 0.3);
+/* 	background-image: url('/img/stars.png'); */
+  width: 95%;
+}
+
+.ttDate {
+	display: inline-block;
+	color: lightblue;
+}
+
+.btnCircle{
+  display: inline-block;
+  text-decoration: none;
+  color: #668ad8;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: solid 3px #668ad8;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  font-weight: bold;
+  transition: .4s;
+  background: #fff;
+  font-size: auto;
+}
+
+.btnCircle:hover {
+  background: #b3e1ff;
+}
+
+.btnCircleAudio {
+  display: inline-block;
+  text-decoration: none;
+  color: #668ad8;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: solid 3px #668ad8;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  font-weight: bold;
+  transition: .4s;
+  background: #fff;
+  font-size: auto;
+}
+
+.numIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: white;
+  border: solid 3px red;
+  color: red;
+  font-size: larger;
+  font-weight: bolder;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+  line-height: 30px;
+  vertical-align: middle;
+}
+.numIcon2 {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: red;
+  border: solid 3px red;
+  color: white;
+  font-size: larger;
+  font-weight: bolder;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+  line-height: 30px;
+  vertical-align: middle;
+}
+
+.bsIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgb(224, 231, 255);
+  border: solid 3px rgb(80, 109, 202);
+  color: rgb(80, 109, 202);
+  font-size: larger;
+  font-weight: bolder;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+  line-height: auto;
+  vertical-align: middle;
+}
+
+.bsTimeTable {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 100%;
+  border-radius: 10px;
+  line-height: 120%;
+  align-content: center;
+}
+
+.bsTimeTable .bsTimeTime {
+  display: inline-block;
+  border-radius: 10px;
+  border: solid 2px white;
+  vertical-align: middle;
+  font-size: 2em;
+  font-weight: bold;
+  padding: 0.5em;
+  align-content: center;
+  left: 0px;
+  max-width: 30%;
+  white-space: nowrap;
+}
+
+.bsTimeTable.bsTimeDesc {
+  display: inline-block;
+  align-content: right;
+  padding: 0.5em;
+  line-height: 120%;
+}
+
+.bsTimeSign {
+  display: block;
+  font-size: 1.3em;
+  font-weight: bolder;
+  line-height: 1.3em;
+  margin-bottom: 0.5em;
+  color: yellow;
+}
+
+.bsTimeTable.bsTimeSchedule {
+  display: block;
+  line-height: 2em;
+  font-size: 1em;
+  bottom: 0px;
+}
+
+.flash{ 
+	color: yellow;
+  animation: flash 2s ease infinite;
+}
+
+@keyframes flash {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 旅程詳細 */
+.accordion-wrapper {
+  margin: 0 auto;
+}
+
+.accordion-wrapper div.timeTable {
+  cursor: pointer;
+}
+
+.accordion-wrapper .hide {
+  display: none;
+}
+
+.accordion-wrapper .add {
+	color: red;
+  display: block;
+}
+
+.planDesc {
+	border: none;
+}
+
+.planDesc .edge {
+	background-color: #333;
+	border-color: #333;
+}
+
+.planDesc td {
+	padding: 15px;
+}
+
+.planDesc .headsign {
+	font-size: smaller;
+	color: rgb(255, 217, 0);
+	display: inline-block; 
+	border-color: rgb(255, 217, 0);
+	border-style: solid;
+	padding: 5px;
+	margin: 5px;
+	line-height: 110%;
+	font-weight: bold;
+	border-radius: 10px;
+}
+
+.planDesc .schedules {
+	white-space: nowrap;
+}
+
+.planDesc .dateBig {
+	font-size: larger;
+	color: lightblue;
+}
+
+.planDesc .dateSmall {
+	font-size: smaller;
+	color: lightblue;
+}
+
+@-webkit-keyframes message {
+	0% { background-color: green; }
+	50% { background-color: rgba(0, 255, 0, 0); }
+	100% { background-color: green; }
+}
+
+@keyframes message {
+	0% { background-color: green; }
+	50% { background-color: rgba(0, 255, 0, 0); }
+	100% { background-color: green; }
+}
+
+#demo {
+	width: 100%;
+	font-size: smaller;
+	font-weight: bold;
+	background-color: green;
+	animation: message 7s infinite;
+	-webkit-animation: message 7s infinite;
+	overflow: hidden;
+}
+
+.btnGroup {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5;
+  margin-bottom: 1rem;
+  font-size: small;
+  font-weight: bold;
+  background-color: black;
+	justify-content: center;
+  align-items: center;
+  }
+.btnGroup button {
+  background-color: black;
+	padding: 0.3em 0.8em;
+  text-decoration: none;
+  color: orange;
+  border: solid 1px orange;
+  border-radius: 3px;
+  transition: .2s;
+}
+.btnGroup button:hover {
+    background: orange;
+    color: white;
+}
+.btnGroup span {
+  background-color: black;
+	padding: 0.3em 0.8em;
+  text-decoration: none;
+  color: orange;
+  border: solid 1px orange;
+}
+.em {
+  color: yellow;
+  font-weight: bold;
+}

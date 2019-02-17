@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=7kogmNYm8v">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=7kogmNYm8v">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=7kogmNYm8v">
+	<link rel="manifest" href="/site.webmanifest?v=7kogmNYm8v">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg?v=7kogmNYm8v" color="#f7d000">
+	<link rel="shortcut icon" href="/favicon.ico?v=7kogmNYm8v">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-title" content="ちどりーど">
+	<meta name="application-name" content="ちどりーど">
+	<meta name="msapplication-TileColor" content="#f7d000">
+	<meta name="theme-color" content="#f7d000">
+
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="css/w3.css">
+	<link rel="stylesheet" type="text/css" href="css/w3-theme-dark-grey.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script type="text/javascript" src="js/base.js"></script>
+	<script src="js/particles.min.js"></script>
+	<style>
+	  html,
+	  body {
+	    margin: 0;
+	    padding: 0;
+	  }
+	  .background {
+		  position: absolute;
+		  display: block;
+		  top: 0;
+		  left: 0;
+		  z-index: -1;
+		}
+		setsumei,setsumei2 {
+			display: inline-block;
+			text-align: left;
+		}
+	</style>
+	<script>
+	  function showParticles() {
+	    Particles.init({
+			  selector: '.background',
+			  sizeVariations: 4,
+			  color: ['#fff', 'orange', 'lightyellow', 'lightblue'],
+			  speed: 0.3
+			});
+		}
+		
+	  function changeVisible() {
+	    var str = document.getElementById("do");
+	    if(checkData()){
+	      str.style.display = "block";
+	    } else {
+	      document.getElementById("setsumei").innerHTML = "<p>設定すると「どっ？」ボタンが現れます</p>";
+	      str.style.display = "none";
+	    }
+	  }
+	  
+	  function changeVisible2() {
+	    var str2 = document.getElementById("vehicleLocation");
+	    if(localStorage.getItem('routeData')){
+	      str2.style.display = "block";
+	    } else {
+	      document.getElementById("setsumei2").innerHTML = "<p>「どっ？」ボタンを押して旅程が確定した後に、「バス位置確認」ボタンが現れます</p>";
+	      str2.style.display = "none";
+	    }
+	  }
+	</script>
+	<title>ちどりーど</title>
+</head>
+<body onload="changeVisible(); changeVisible2(); showParticles();">
+  <h1 id="titled">ちどりーど</h1>
+  <div class="boxinfo">
+    「ちどりーど」= 千鳥足＋リード<br>
+    「どっ？」= 佐賀弁で「飲む？」<br>
+    「ぬっ。」= 佐賀弁で「寝る」
+  </div>
+  <button class="btn2" type="button" onclick="goShirahuPage();">設定する</button>
+  <div id="setsumei"></div> 
+  <div id="do">
+    <button class="btn" type="button" onclick="goDoPage();">どっ？</button>
+  </div>
+  <div>
+    <button class="btn2" type="button" onclick="goInfoPage(); playAlerm1();">
+    <i class="fa fa-info-circle"></i> 使用法
+    </button>
+  </div>
+  <div id="setsumei2"></div>
+  <div id="vehicleLocation">
+    <button class="btn2" type="button" onclick="location.href='vehicleLocation.html';">
+      バス位置確認
+    </button>
+  </div>
+  <button class="btn2" type="button" onclick="location.href='nuDemo.html';">
+    乗車モードデモ
+  </button>
+  <canvas class="background"></canvas>
+  <script src="/js/particles.min.js"></script>
+</body>
+</html>

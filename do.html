@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Cache-Control" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/w3.css">
+    <link rel="stylesheet" type="text/css" href="css/w3-theme-dark-grey.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/base.js">
+    </script>
+
+    <title>どっ？</title>
+</head>
+<body onload="checkCurrentPosition();">
+	<div class="btnGroup">
+	  <button onclick="goHomePage();">戻る</button>
+	  <button onclick="goFLPage();">バス停近くのお店を探す</button>
+	</div>
+  <div id="demo"></div>
+  <div class="busButton" id="busButton" onclick="playBusButton();"><img src="img/button1.png"></div>
+</html>

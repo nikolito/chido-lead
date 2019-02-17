@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <meta http-equiv="refresh"content="300;URL=nuDemo.html">
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <script src="js/leaflet.js"></script>
+    <link rel="stylesheet" href="css/L.Icon.Pulse.css" />
+    <script type="text/javascript" src="js/L.Icon.Pulse.js"></script>
+    <script type="text/javascript" src="js/Leaflet.Icon.Glyph.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/base.js"></script>
+    <script src="js/vehicle.js"></script>
+    <script src="js/motion.js"></script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      html, body, #map {
+        height: 100%;
+        width: 100vw;
+      }
+      #realBs {
+        position: absolute;
+        z-index: 10000;
+        top: 15px;
+        right: 15px;
+      }
+      #realBs2 {
+        position: absolute;
+        z-index: 10000;
+        top: 80px;
+        right: 15px;
+      }
+      #info {
+        position: absolute;
+        z-index: 10000;
+        bottom: 0px;
+        width: 100%;
+        font-size: small;
+        background-color: rgba(255,0,0,0.7);
+      }
+      #result {
+        position: absolute;
+        z-index: 10001;
+        background-color: rgba(0,0,0,0.9);
+      }
+      #demoMessage {
+	      position: absolute;
+	      top: 4rem;
+	      left: 50px;
+	      max-width: 80%;
+	      z-index: 10000;
+	      background-color: rgba(255,255,255,0.8);
+				display: inline-box;
+			  justify-content: center;
+			  align-items: center;
+	      border: solid 3px red;
+	      border-radius: 10px;
+	      color: black;
+      }
+      #demoMessage p {
+	      margin: 5;
+      }
+      #demoMessageTop {
+        position: absolute;
+        z-index: 500;
+        top: 0px;
+        width: 100%;
+        background-color: green;
+      }
+      #demoMessageTop p {
+        font-size: small;
+        line-height: 1em;
+        margin-left: 70px;
+        margin-right: 70px;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      
+    </style>
+    <script>
+	  //乗車モードデモ画面
+	  //1. JR佐賀駅から佐賀大学前までにルート固定
+	  //佐賀大学　33.242264,130.291517
+	  //2. その路線上のバス停を描画
+	  //3. 車両現在地と目的バス停間の距離を計測
+	  
+    //乗車後のアクション
+    //trip_id引用
+    const station = [33.264007,130.296483];
+    const univ = [33.242264,130.291517];
+
+	  let chara;
+	  if (localStorage.getItem('navichara')) {
+	  	chara = localStorage.getItem('navichara') + '.png';
+	  } else {
+		  chara = 'n2.png';
+	  }
+	  
+	  let nickname;
+	  if (localStorage.getItem('nickname')) {
+	  	nickname = localStorage.getItem('nickname');
+	  } else {
+		  nickname = 'テスト';
+	  }
+	  
+    //初期化
+    localStorage.removeItem('tripIdList');
+    
+    let now = new Date();
+    
+    //プラン
+    let routeQuery = readXML('https://summer.hori-s.net/otp/routers/default/plan?fromPlace=' + station[0] + ',' + station[1] + '&toPlace=' + univ[0] + ',' + univ[1] + '&time=' + now.getHours() + ':' + now.getMinutes() + '&date=' + (now.getMonth() + 1) + '-' + now.getDate() + '-' + now.getFullYear() + '&mode=WALK,TRANSIT&maxWalkDistance=500&arriveBy=false&numItineraries=1');
+    //console.log(routeQuery);
+    
+    let item = routeQuery['plan']['itineraries'];
+    
+    var toStop = new Array();
+    var tripId;
+    
+    item.some(function(el) {
+	    //console.log(el['legs']);
+	    
+	    el['legs'].some(function(el2) {
+				if (el2['mode'] == 'BUS') {
+		    	toStop = [el2['to']['stopId'],el2['to']['name'],el2['to']['lat'],el2['to']['lon']];
+					tripId = el2['tripId'];
+					return true;
+	    	}
+	    });
+    });
+    
+    //console.log(tripId);
+    //console.log(toStop);
+      
+    function findMyBus() {
+			document.getElementById('info').innerHTML = '5秒程度お待ちください…';
+		
+      //現在地から佐賀大学に向かっているバスの中で、もっとも近いバスを探索
+      //tripIdがvehicles[n][3]と一致するvehicles[n]を探索
+			//var myVehicle; //自分が乗っているバス（これを探す）
+			var vlat,vlon;
+			
+      let tid = tripId.split(':');
+      
+      //車両IDセット
+      //localStorage.setItem('myVehicleId', myVehicle);
+      //console.log(myVehicle);
+
+      //乗車バス系統ID(trip_id)をstop_times.txtから抽出
+      //stop_id群のうち、現在地との最短距離にあるstop_idが乗車バス停とする
+      function getTripIdListFromStopTimes(trip_id) {
+/*
+		    let stopTimes = new Array();
+		    stopTimes = csvToArray('busData/stop_times.txt');
+		    stopTimes.shift();
+		    
+        let trip_id_list = new Array();
+        stopTimes.forEach(function(el) {
+          if (el[0].replace(/\"/g,'') == trip_id) {
+            trip_id_list.push(el);
+          }
+        });
+        return trip_id_list; //系統のリスト
+*/
+		    let stopTimes = readXML('https://summer.hori-s.net/getTripId.php?tid=' + trip_id);
+        return stopTimes; //系統のリスト
+      }
+
+      //系統のリストを保存
+      var tripIdList = getTripIdListFromStopTimes(tid[1]);
+
+      localStorage.setItem('tripIdList', JSON.stringify(tripIdList));
+      //console.log(tripIdList); //
+      
+			localStorage.setItem('stopidRideOn', JSON.stringify(toStop));
+    }
+
+    //地図とバス表示
+    function showMap() {
+	    document.getElementById('demoMessageTop').innerHTML = '<p>デモのためバスは5秒ごとに動かしています</p>';
+	    
+      //地図描画
+      var mymap = L.map('map');
+      
+      L.control.scale({imperial:false}).addTo(mymap);
+      
+      //車両位置をセット
+      function setBusLocation(){
+ 
+        //function success(e) {
+        mymap.setView([station[0], station[1]], 13);
+
+        //OpenStreetMapをロード
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: 'Map data &copy; <a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors, '
+        }).addTo(mymap);
+
+        var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'#1199fb'});
+        var busIcon = L.icon({iconUrl: 'img/bus24x24g.png',iconSize: [40,40], zIndexOffset: 10010});
+        var iconStation = L.icon.glyph({prefix: 'fa' ,glyph: 'train'});
+        var iconSagaUniv = L.icon.glyph({prefix: 'fa' ,glyph: 'university'});
+				
+				//ランドマーク
+				L.marker([station[0],station[1]],{icon: iconStation, zIndexOffset: 10000}).addTo(mymap).bindPopup('<p>JR佐賀駅</p>');
+				L.marker([univ[0],univ[1]],{icon: iconSagaUniv, zIndexOffset: 10000}).addTo(mymap).bindPopup('<p>佐賀大学</p>');
+
+				//バス停
+          var tripList = new Array();
+          tripList = JSON.parse(localStorage.getItem('tripIdList'));
+          
+          var cn = 0;
+          var arr = new Array();
+          var vehicles1 = new Array();
+          var flag = 0;
+            
+          while (cn < tripList.length) {
+            //tripList[cn][3]　標柱id
+            arr = findBSLocationFromStopId(tripList[cn][3].replace(/\"/g,''));
+            //console.log(arr);
+            
+            if (arr != null) {
+              let latBs = arr[4];
+              let lngBs = arr[5];
+              let hyochu = arr[2];
+              let arrival = tripList[cn][2];
+              let a = arrival.split(':');
+
+              //目的のバス停があれば表示を強調
+              let iconNumber = L.divIcon({html: '<div>' + (cn+1) + '</div>', className: 'numIcon', iconSize: [30,30]});
+              let iconNumber2 = L.divIcon({html: '<div>' + (cn+1) + '</div>', className: 'numIcon2', iconSize: [30,30]});
+
+              if (hyochu != toStop[1]) {
+	              if (cn == 0) {
+		              L.marker([latBs,lngBs],{icon: iconNumber, zIndexOffset: -1000}).addTo(mymap).bindPopup('<p>「乗車したバス停」<br>'+ hyochu + '<br>' + a[0] + ':' + a[1] + '発</p>').openPopup();
+	              } else {
+	              	//その他のバス停
+	                L.marker([latBs,lngBs],{icon: iconNumber, zIndexOffset: -1000}).addTo(mymap).bindPopup('<p>'+ hyochu + '<br>' + a[0] + ':' + a[1] + '発</p>');
+	              }
+              } else {
+                //目的のバス停
+                L.marker([latBs,lngBs],{icon: iconNumber2, zIndexOffset: -1000}).addTo(mymap).bindPopup('<p>「帰りのバス停」<br>' + hyochu + '<br>' + a[0] + ':' + a[1] + '発</p>');
+                flag = cn + 1;
+              }
+              
+              vehicles1.push([latBs,lngBs,(cn+1)]);
+            }
+            cn++;
+          }
+
+        //リアルタイム車両位置表示
+        var layerGroup = L.layerGroup().addTo(mymap);
+        var count = 0;
+        
+        setInterval(refreshBusLocation, 5000);
+        
+        function refreshBusLocation() {
+					document.getElementById('info').innerHTML = '';
+          layerGroup.clearLayers();
+
+          //系統tripIdListが取得できている必要がある
+          bsList = toStop[1];
+          //console.log(bsList);
+          //console.log(toStop);
+
+          //車両            
+          //console.log(vehicles1);
+
+          let latBr1 = vehicles1[count][0];
+          let lngBr1 = vehicles1[count][1];
+          let sidNum = vehicles1[count][2]; //バス停番号
+          //console.log(flag + ',' + sidNum);
+          
+          vInfo = '<p align="center">佐賀に来て市営バスに乗ってみて！<br><img src="/img/busOmiyage.jpg" width="50%"></p>';
+          L.marker([latBr1, lngBr1],{icon:busIcon, zIndexOffset: 10100}).bindPopup(vInfo).addTo(layerGroup);
+          
+          //バスと到着バス停間の距離をinfoに表示
+          var distance = checkDistance(toStop[2],toStop[3],latBr1,lngBr1);
+          //console.log(distance);
+          
+          if (flag > sidNum) {
+          	document.getElementById('info').innerHTML = toStop[1] + 'まであと' + Math.ceil(distance) + 'm！';
+          } else {
+	          document.getElementById('info').innerHTML = '';
+          }
+          
+          //アラーム画面
+          
+          if (distance < 1100 && distance >= 900 && flag > sidNum) {
+		        document.getElementById('result').innerHTML = '<p class="messagesNickname2">' + nickname + 'さん</p><p class="messages2">あと1km!</p><img class="focus" src="img/' + chara + '">' + '<audio id="player" autoplay><source src="/sound/warning1.mp3" type="audio/mp3"></audio>';
+		        
+		        setTimeout(function(){
+			        document.getElementById('result').innerHTML = '';
+			        document.getElementById('info').innerHTML = toStop[1] + 'まであと' + Math.ceil(distance) + 'm！';
+		        }, 5000);
+          }
+          
+          if (distance < 300 && flag >= sidNum) {
+		        document.getElementById('result').innerHTML = '<p class="messagesNickname2">' + nickname + 'さん</p><p class="messages2">すぐ降りて!</p><img class="focus" src="img/' + chara + '">' + '<audio id="player" autoplay><source src="/sound/warning1.mp3" type="audio/mp3"></audio>';
+		        
+		        setTimeout(function(){
+			        document.getElementById('result').innerHTML = '';
+			        //document.getElementById('info').innerHTML = toStop[1] + 'まであと' + Math.ceil(distance) + 'm！';
+		        }, 5000);
+          }
+          
+          if (count >= 0 && count <= 2) {
+	          document.getElementById('dm').innerHTML = '<div id="demoMessage"><p>バスに乗ると、乗車したバスを自分の現在地とバスの距離から特定します。</p></div>';
+          }
+          
+          if (count > 2 && count <= 4) {
+	          document.getElementById('dm').innerHTML = '<div id="demoMessage"><p>設定画面で決めた「帰りのバス停」までのバスルートと位置が表示されます。</p></div>';
+          }
+      
+          if (count > 4 && count <= 6) {
+	          document.getElementById('dm').innerHTML = '<div id="demoMessage"><p>目的のバス停近くになるとアラームが出ます。</p></div>';
+          }
+          
+          if (count > 6 && count <= 8) {
+	          document.getElementById('dm').innerHTML = '<div id="demoMessage"><p>バスに乗った後も自分のバスの位置とバス停を確認して不安を解消します！</p></div>';
+          }
+      
+          if (count > 14 && count <= 16) {
+	          document.getElementById('dm').innerHTML = '<div id="demoMessage"><p>赤い円は停車するバス停で、数字は停車する順番です。</p></div>';
+          }
+
+          if (count > 16 && count <= 18) {
+	          document.getElementById('dm').innerHTML = '<div id="demoMessage"><p>ちなみに表示中のルートはOpenTripPlanner（オープンソースのルート検索ツール）で検索しています。</p></div>';
+          }
+
+          if (count > 18) {
+	          document.getElementById('dm').innerHTML = '';
+          }
+          
+	        //console.log(count);
+	        count++;
+	        if (count >= vehicles1.length) {
+	          count = 0;
+	        }
+        }
+      }
+      setBusLocation();
+    }
+
+  </script>
+  <title>ぬっ。</title>
+</head>
+<body onload="findMyBus(); showMap();">
+  <div id="demoMessageTop"></div>
+  <div id="dm"></div>
+  <div id="result"></div>
+  <div id="realBs"><button class="btnCircle" type="button" onclick="goHomePage()">戻る</button></div>
+	<div id="realBs2"><button class="btnCircle" type="button" onclick="location.reload()"><i class="fas fa-sync-alt" aria-hidden="true"></i></button></div>
+  <div id="map"></div>
+  <div id="info"></div>
+</body>
+</html>

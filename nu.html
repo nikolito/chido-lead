@@ -1,0 +1,330 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+<!--
+    <link rel="stylesheet" href="components/loader.css">
+    <script src="components/loader.js"></script>
+    <link rel="stylesheet" href="components/monaca-onsenui/css/dark-onsen-css-components.min.css">
+-->
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <script src="js/leaflet.js"></script>
+    <link rel="stylesheet" href="css/L.Icon.Pulse.css" />
+    <script type="text/javascript" src="js/L.Icon.Pulse.js"></script>
+    <script type="text/javascript" src="js/Leaflet.Icon.Glyph.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/base.js"></script>
+    <script src="js/vehicle.js"></script>
+    <script src="js/motion.js"></script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      html, body, #map {
+        height: 100%;
+        width: 100vw;
+      }
+      #realBs {
+        position: absolute;
+        z-index: 10000;
+        top: 15px;
+        right: 15px;
+      }
+      #realBs2 {
+        position: absolute;
+        z-index: 10000;
+        top: 80px;
+        right: 15px;
+      }
+      #audio {
+        position: absolute;
+        z-index: 10000;
+        top: 80px;
+        right: 15px;
+      }
+      #info {
+        position: absolute;
+        z-index: 10000;
+        bottom: 0px;
+        width: 100%;
+        font-size: small;
+        background-color: rgba(255,0,0,0.7);
+      }
+      #result {
+        position: absolute;
+        z-index: 10001;
+        background-color: rgba(0,0,0,0.9);
+      }
+    </style>
+    <script>
+	  //エリア外はデモ画面に遷移
+    if (outsideOfSaga()) {
+	    alert('現在地はルート検索対象外のため、デモ画面に切り替えます。');
+	    goNuDemo();
+    }
+
+    //乗車後のアクション
+
+    //初期化
+    localStorage.removeItem('stopidRideOn');
+    localStorage.removeItem('tripIdList');
+    localStorage.removeItem('myVehicleId');
+
+    ////////////////////////////////////////////////////////////
+    //現在地から一番近いバスを見つける motion.js
+    //var timerId = setInterval(findMyBus, 1000);
+    
+    function findMyBus() {
+      //現在地
+		  if (!navigator.geolocation){
+		    alert('あなたのブラウザでは地理情報取得機能が使えないようです…。');
+		    return;
+		  }
+
+      function success(e) {
+        //現在地
+        var lat1  = e.coords.latitude;
+        var lng1 = e.coords.longitude;
+
+        //もっとも近いバス探索
+        var v2 = localStorage.getItem('vehicle');
+        var vehicles2 = JSON.parse(v2);
+        vehicles2.sort();
+        var c = 0;
+        var distance = new Array();
+        var myVehicle = new Array(); //自分が乗っているバス
+        var closest;
+
+        while (c < vehicles2.length) {
+          distance = checkDistance(lat1,lng1,vehicles2[c][1],vehicles2[c][2]);
+          //console.log(distance);
+          
+          if (c == 0) {
+            closest = distance;
+            myVehicle = vehicles2[c];
+            myVehicle.push(closest);
+          } else {
+            if (closest > distance) {
+              myVehicle = [];
+              closest = distance;
+              myVehicle = vehicles2[c];
+              myVehicle.push(distance);
+            }
+          }
+          c++;
+        }
+        
+        localStorage.setItem('myVehicleId', myVehicle[0]);
+        //console.log(myVehicle[0]);
+
+        //乗車バス系統ID(trip_id)をstop_times.txtから抽出
+        //stop_id群のうち、現在地との最短距離にあるstop_idが乗車バス停とする
+        function getTripIdListFromStopTimes(trip_id) {
+			    let stopTimes = readXML('https://summer.hori-s.net/getTripId.php?tid=' + trip_id);
+	        return stopTimes; //系統のリスト
+        }
+
+        //系統のリストを保存
+        var tripIdList = getTripIdListFromStopTimes(myVehicle[3]);
+
+        localStorage.setItem('tripIdList', JSON.stringify(tripIdList));
+        //console.log(tripIdList[0]); //
+
+        //系統から乗車したバス停を探す
+        var ct = 0;
+        var stopidRideOn = new Array();
+        var stopArray = new Array();
+
+        while (ct < tripIdList.length) {
+          stopArray = findBSLocationFromStopId(tripIdList[ct][3]);
+          //console.log(stopArray);
+          var distance2 = checkDistance(lat1,lng1,stopArray[4],stopArray[5]);
+          //console.log(distance2);
+          if (ct == 0) {
+            var closest2 = distance2;
+            stopidRideOn = stopArray;
+            stopidRideOn.push(closest2);
+          } else {
+            if (closest2 > distance2) {
+              stopidRideOn = [];
+              closest2 = distance2;
+              stopidRideOn = stopArray;
+              stopidRideOn.push(distance2);
+            }
+          }
+          ct++;
+        }
+        
+        localStorage.setItem('stopidRideOn', JSON.stringify(stopidRideOn));
+        //console.log(stopidRideOn);
+
+      }
+    
+		  function error(e) {
+				// エラーコードのメッセージを定義
+				var errorMessage = {
+					0: "原因不明のエラーが発生しました…。" ,
+					1: "位置情報の取得が許可されませんでした…。" ,
+					2: "電波状況などで位置情報が取得できませんでした…。" ,
+					3: "位置情報の取得に時間がかかり過ぎてタイムアウトしました…。" ,
+				} ;
+			
+				// エラーコードに合わせたエラー内容を表示
+				alert(errorMessage[e.code] + 'デモモードに入ります。') ;
+			  var lat  = 33.264007;//JR佐賀駅
+			  var lng = 130.296483;
+			  localStorage.setItem('currentPosition', lat + ',' + lng);
+			  localStorage.setItem('demoflag', 'true');
+			  
+			  goNuDemo();
+		  }
+
+      navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true, maximumAge: 0});
+
+      //乗車バス情報がセットされたら停止
+    }
+
+    //地図とバス表示
+    function showMap() {
+      //地図描画
+      var mymap = L.map('map');
+      
+      L.control.scale({imperial:false}).addTo(mymap);
+      
+      //車両位置をセット
+      function setBusLocation(){
+        var cloc = localStorage.getItem('currentPosition').split(',');
+        mymap.setView([cloc[0], cloc[1]], 13);
+
+        //OpenStreetMapをロード
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
+        }).addTo(mymap);
+
+        var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'#1199fb'});
+        var busIcon = L.icon({iconUrl: 'img/bus24x24g.png',iconSize: [40,40], zIndexOffset: 10000});
+
+        //リアルタイム現在地
+        mymap.locate({watch: true}); //watch
+        var myLoc;
+        
+        mymap.on('locationfound', function(ev){
+          var lat  = ev.latitude;
+          var lng = ev.longitude;
+
+          if (!myLoc) {
+            myLoc = L.marker(ev.latlng,{icon:pulsingIcon}).bindPopup('<p>現在地 (' + lat + ',' + lng + ')</p>').openPopup().addTo(mymap);
+          } else {
+            myLoc.setLatLng(ev.latlng);
+            //console.log(ev.latlng);
+          }
+        });
+
+        //リアルタイム車両位置表示
+        var layerGroup = L.layerGroup().addTo(mymap);
+        localStorage.removeItem('bsDestination');
+        
+        setInterval(refreshBusLocation, 10000);
+        
+        function refreshBusLocation() {
+          layerGroup.clearLayers();
+
+          //バス停 no.htmlで系統が取得できている必要がある
+          var tripList = new Array();
+          tripList = JSON.parse(localStorage.getItem('tripIdList'));
+          
+          var bsList = new Array();
+          bsList = localStorage.getItem('busstop').split(',');
+          //console.log(bsList);
+
+          var cn = 0;
+          while (cn < tripList.length) {
+            //tripList[cn][3]　標柱id
+            let arr = new Array();
+            arr = findBSLocationFromStopId(tripList[cn][3]);
+            //console.log(arr);
+            
+            if (arr != null) {
+              var latBs = arr[4];
+              var lngBs = arr[5];
+              var hyochu = arr[2];
+              var hyochu2 = hyochu.replace(/\(\d\)/g, '');
+              var arrival = tripList[cn][2];
+              var ar = arrival.split(':');
+
+              //目的のバス停があれば表示を強調
+              var iconNumber = L.divIcon({html: '<div>' + (cn+1) + '</div>', className: 'numIcon', iconSize: [30,30]});
+              var iconNumber2 = L.divIcon({html: '<div>' + (cn+1) + '</div>', className: 'numIcon2', iconSize: [30,30]});
+
+              bsList.forEach(function(el) {
+                //console.log(hyochu2 +','+ el);
+                if (hyochu2 == el) {
+                	//目的のバス停
+                  L.marker([latBs,lngBs],{icon: iconNumber2, zIndexOffset: -1000}).addTo(mymap).bindPopup("<p>"+ hyochu + '<br>' + ('0' + ar[0]).slice(-2) + ':' + ('0' + ar[1]).slice(-2) + '発</p>');
+                  
+                  //目的のバス停情報をlocalStorageへ
+                  localStorage.setItem('bsDestination', hyochu + ',' + latBs + ',' + lngBs);
+                } else {
+                  //その他のバス停
+                  L.marker([latBs,lngBs],{icon: iconNumber, zIndexOffset: -1000}).addTo(mymap).bindPopup("<p>"+ hyochu + '<br>' + ('0' + ar[0]).slice(-2) + ':'  + ('0' + ar[1]).slice(-2) + '発</p>');
+                }
+              });
+            }
+            cn++;
+          }
+
+          //車両
+          var v1 = '';
+          var v1 = localStorage.getItem('vehicle');
+          var vehicles1 = [];
+          
+          vehicles1 = JSON.parse(v1);
+          vehicles1.sort();
+          // console.log(vehicles1);
+          
+          var cr = 0;
+          var myVehicleId = localStorage.getItem('myVehicleId');
+          //console.log(myVehicleId);
+          
+          if (myVehicleId != null) {
+            var vInfo = '';
+            while (cr < vehicles1.length) {
+              if (vehicles1[cr][0] == myVehicleId) {
+                var latBr1 = vehicles1[cr][1];
+                var lngBr1 = vehicles1[cr][2];
+                var vehicle1 = vehicles1[cr][0];
+                var vehicleSign = vehicles1[cr][3];
+                var t = vehicles1[cr][4] * 1000;
+                var date = new Date(t);
+                var vehicleCheckTime = date.toString();
+                //console.log(myVehicleId);
+                //console.log(latBr1 +','+ lngBr1);
+
+                vInfo = '<p>' + vehicleSign + '<br>（最終チェック）' + vehicleCheckTime + '</p>';
+                L.marker([latBr1, lngBr1],{icon:busIcon}).bindPopup(vInfo).addTo(layerGroup);
+              }
+              cr++;
+            }
+          }
+        }
+      }
+      setBusLocation();
+    }
+
+  </script>
+  <title>ぬっ。</title>
+</head>
+<body onload="findMyBus(); showMap(); checkAlarmNu();">
+  <div id="demo"></div>
+  <div id="result"></div>
+  <div id="realBs"><button class="btnCircle" type="button" onclick="goNoPage()">戻る</button></div>
+	<div id="realBs2"><button class="btnCircle" type="button" onclick="location.reload()"><i class="fas fa-sync-alt" aria-hidden="true"></i></button></div>
+  <div id="map"></div>
+  <div id="info"></div>
+</body>
+</html>

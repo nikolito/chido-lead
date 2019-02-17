@@ -1,0 +1,409 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <script src="js/leaflet.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/L.Icon.Pulse.css" />
+    <script type="text/javascript" src="js/L.Icon.Pulse.js"></script>
+    <script type="text/javascript" src="js/Leaflet.Icon.Glyph.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/base.js"></script>
+    <script src="js/vehicle.js"></script>
+    <!-- <script src="js/alert.js"></script> -->
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      html, body, #map {
+        height: 100%;
+        width: 100vw;
+      }
+      #realBs {
+        position: absolute;
+        z-index: 10000;
+        top: 90px;
+        left: 5px;
+      }
+      #info {
+        position: absolute;
+        z-index: 10000;
+        bottom: 0px;
+        width: 100%;
+        max-height: 50%;
+        overflow: scroll;
+        font-size: small;
+        background-color: rgba(0,0,0,0.7);
+        line-height: 120%;
+      }
+			.layers-vehicles {
+					border-radius: 3px;
+					background-color: white;
+			    background-image: url('/img/bus16x16.png');
+			    width: 24px;
+			    height: 24px;
+			    z-index: 10100;
+			}
+			.layers-busstops {
+					border-radius: 32px;
+					border-color: blue;
+					background-color: white;
+			    background-image: url('/img/busstop.png');
+			    width: 24px;
+			    height: 24px;
+			}
+			a {
+				text-decoration: none;
+				color: white;
+			}
+			a:hover {
+				color: yellow;
+			}
+
+    </style>
+    <script>
+			outsideOfSaga();
+	    flagDemo();
+
+    //trip_idのデータ抽出
+    function findTripidData(tripid) {
+	    let stopTimes = readXML('https://summer.hori-s.net/getTripId.php?tid=' + tripid);
+      return stopTimes; //系統のリスト
+
+      var data = new Array();
+      
+      stopTimes.forEach(function(el) {
+	      
+        if (el[0].replace(/\"/g,'') == tripid) {
+          data.push([el[1].replace(/\"/g,''),el[2].replace(/\"/g,''),el[3].replace(/\"/g,''),el[4].replace(/\"/g,''),el[5].replace(/\"/g,'')]);
+        }
+        
+      });
+      
+      //console.log(data);
+      return data;
+    }
+    
+    function showMap() {
+      var mymap = L.map('map');
+      var layerGroupMk = L.layerGroup().addTo(mymap);
+      var lat;
+      var lng;
+      
+      mymap.on('click', function(ev){
+        //クリア
+        document.getElementById('info').innerHTML = '';
+        layerGroupMk.clearLayers();
+      });
+
+      L.control.scale({metric: true, imperial: false}).addTo(mymap);
+      
+      function setBusLocation(){
+        let loc = localStorage.getItem('currentPosition').split(',');
+        lat  = loc[0];
+        lng = loc[1];
+
+        //console.log(lat + ',' + lng);
+        
+        mymap.setView([lat, lng], 13);
+
+        //OpenStreetMapをロード
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: 'Map data &copy; <a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors, '
+        }).addTo(mymap);
+
+        var pulsingIcon = L.icon.pulse({iconSize:[15,15],color:'#1199fb'});
+        //var busstopIcon = L.divIcon({html: '<div><i class="fas fa-bus"></i></div>', className: 'bsIcon', iconSize: [20,20]});
+        var busIcon = L.icon({iconUrl: 'img/bus24x24g.png',iconSize: [40,40], zIndexOffset: 10000});
+
+        //現在地
+        var myLoc;
+          
+        if (localStorage.getItem('demoflag') == 'false') {
+	        //現在地を取得できた場合
+	        
+          mymap.locate({watch: true});
+          mymap.on('locationfound', function(ev){
+            if (!myLoc) {
+              myLoc = L.marker(ev.latlng,{icon:pulsingIcon, zIndexOffset: 10002}).bindPopup('<p>現在地 (' + lat + ',' + lng + ')</p>').openPopup().addTo(mymap);
+            } else {
+              myLoc.setLatLng(ev.latlng);
+              //console.log(ev.latlng);
+            }
+          });
+        } else {
+	        //現在地を取得できない場合はデモモードに移行する
+	        mymap.locate({watch: false});
+	        myLoc = L.marker([lat,lng],{icon:pulsingIcon, iconFillColor: 'green', zIndexOffset: 10002}).bindPopup('<p>デモ用現在地 (' + lat + ',' + lng + ')</p>').openPopup().addTo(mymap);
+        }
+        
+        //バス停を入力
+        document.getElementById('info').innerHTML = '<p>バスクリックで路線表示<br>バス停クリックで停車時刻表示<br>地図をクリックで表示全消去<br>バス停表示オンオフは右上のレイヤーアイコンをクリック</p>';
+        
+        //stops.txt読込
+        var databs = csvToArray("busData/stops.txt");
+        //databs.shift();
+        var data = makeArrayForHyochu(databs);
+        
+        var layerGroupBS = L.layerGroup().addTo(mymap);
+        var layerGroupBSC = L.layerGroup().addTo(mymap);
+        //var layerGroupBSH = L.layerGroup().addTo(mymap);
+        var layerGroupV = L.layerGroup().addTo(mymap);
+        var layerGroupVC = L.layerGroup().addTo(mymap);
+
+        var overlays = {
+          // "バス停ハブ度オン": layerGroupBSH,
+          "車両オフ": layerGroupVC,
+          "車両オン": layerGroupV,
+        }
+        
+        var overlays2 = {
+          "バス停オフ": layerGroupBSC,
+          "バス停オン": layerGroupBS,
+        }
+        
+				//レイヤーオプション切り替えアイコン2種
+				L.control.layers.TogglerIcon1 = L.Control.Layers.extend({
+			    options: {
+			        // Optional base CSS class name for the toggler element
+			        togglerClassName: undefined
+			    },
+			
+			    _initLayout: function(){
+			        L.Control.Layers.prototype._initLayout.call(this);
+			        if (this.options.togglerClassName) {
+			            L.DomUtil.addClass(this._layersLink, 'layers-vehicles');
+			        }
+			    }
+				});
+
+L.control.layers.TogglerIcon2 = L.Control.Layers.extend({
+			    options: {
+			        // Optional base CSS class name for the toggler element
+			        togglerClassName: undefined
+			    },
+			
+			    _initLayout: function(){
+			        L.Control.Layers.prototype._initLayout.call(this);
+			        if (this.options.togglerClassName) {
+			            L.DomUtil.addClass(this._layersLink, 'layers-busstops');
+			        }
+			    }
+				});
+				
+        var l1 = new L.control.layers.TogglerIcon1(overlays, null, {togglerClassName: 'layers-vehicles'}).addTo(mymap);
+        var l2 = new L.control.layers.TogglerIcon2(overlays2, null, {togglerClassName: 'layers-busstops'}).addTo(mymap);
+        //console.log(l1);
+/*
+        var l1 = L.control.layers(overlays).addTo(mymap);
+        var l2 = L.control.layers(overlays2).addTo(mymap);
+*/
+        
+        var cn = 0;
+        var bmarkers = new Array();
+        var bmarkersHub = new Array();
+          
+        while (cn < data.length) {
+          var latBs = data[cn][2].replace(/\"/g,'');
+          var lngBs = data[cn][3].replace(/\"/g,'');
+          var hyochu = data[cn][1].replace(/\"/g,'');
+          var hyochuId = data[cn][0].replace(/\"/g,'');
+          var bstopInfo = hyochuId + ',' + hyochu + ',' + latBs + ',' + lngBs;
+          
+          bmarkers[cn] = L.circle([latBs,lngBs],{radius:20, color: 'dodgerblue', fill: true, title: bstopInfo + ',' + hyochu}).bindPopup("<p>"+ hyochu + '</p>');
+          //bmarkers[cn] = L.marker([latBs,lngBs],{icon: busstopIcon, zIndexOffset: -5000, title: bstopInfo}).bindPopup("<p>"+ hyochu + '</p>');
+          bmarkers[cn].addTo(layerGroupBS);
+
+          // //バス停のルート数でサイズを変える（ノードの大きさ）
+          // var bsRoutes = readXML('http://153.125.225.94:8080/otp/routers/default/index/stops/1:' + hyochuId + '/routes');
+          // var bsRoutesCounts = data[cn][4];
+
+          // // bmarkersHub[cn] = L.circleMarker([latBs,lngBs],{radius: bsRoutesCounts}).bindPopup("<p>"+ hyochu + '<br>ハブ度' + bsRoutesCounts + '</p>');
+          // // bmarkersHub[cn].addTo(layerGroupBSH);
+
+          bmarkers[cn].on('click', function(ev){
+	          document.getElementById('info').innerHTML = 'しばらくお待ちください...';
+	          
+	          ///////////////////////////////////
+	          //バス停情報取得
+	          var bstopinfoelements = this.options.title.split(',');
+	          var bsinfo = readXML('https://summer.hori-s.net/otp/routers/default/index/stops/1:' + bstopinfoelements[0] + '/stoptimes?numberOfDepartures=10');
+	
+	          //バス停の停車時間
+	          var rosenName;
+	          var rosenTime;
+	          var headsign2;
+	          var schedule;
+	          var baseDate;
+	          var tripId;
+	          var tripId2;
+	          var tripData = new Array();
+	          var scheduledArrival;
+	          var scheduledDeparture;
+	          var val1;
+	          var val2;
+	          var scheduledArrivalTime;
+	          var scheduledDepartureTime;
+	          var testArray = new Array();
+	            
+	          bsinfo.forEach(function(el){
+	            rosenName = el["pattern"]["desc"];
+	            rosenTime = el["times"];
+	            
+	            rosenTime.forEach(function(t) {
+	              headsign2 = t["headsign"];
+	              schedule = t["realtimeState"];
+	              var schedule2;
+	              var scheduleComment = ''; 
+	              
+	              if (schedule == 'SCHEDULED' || Math.ceil(t["departureDelay"] / 60) < 1) {
+	                schedule2 = '<span style="color: lightgreen;">定刻</span>';
+	              } else {
+	                schedule2 = '<span class="flash">更新</span>';
+	                scheduleComment = Math.ceil(t["departureDelay"] / 60) + '分遅れ';
+	              }
+	              
+	              baseDate = t["serviceDay"]; 
+	              scheduledArrival = t["scheduledArrival"]; //baseDate + scheduledArrival = 到着時刻
+	              scheduledDeparture = t["scheduledDeparture"];
+	              val1 = (baseDate + scheduledArrival) * 1000;
+	              val2 = (baseDate + scheduledDeparture) * 1000;
+	              scheduledArrivalTime = new Date(val1);
+	              scheduledDepartureTime = new Date(val2);
+	              tripId = t["tripId"];
+	              tripId2 = tripId.split(':');
+	              
+			          let vehicleAgency;
+			          if (tripId2[1].match(/^1_/) != null) {
+			            vehicleAgency = '<a href="http://www.bus.saga.saga.jp" target="_blank">佐賀市交通局</a>';
+			          } else if (tripId2[1].match(/^4_/) != null) {
+			            vehicleAgency = '<a href="http://www.yutoku.jp/jidousya/bus/" target="_blank">祐徳バス株式会社</a>';
+			          } else {
+			            vehicleAgency = '<a href="http://showa-bus.jp" target="_blank">昭和自動車株式会社</a>';
+			          }
+	              
+	              testArray.push('<p class="bsTimeTable">' + '<span class="bsTimeTable bsTimeTime"><span class="smallerSign">' + (scheduledArrivalTime.getMonth() + 1) + '月' + scheduledArrivalTime.getDate() + '日</span>' + ('0' + scheduledDepartureTime.getHours()).slice(-2) + ':' + ('0' + scheduledDepartureTime.getMinutes()).slice(-2) + '<span class="bsTimeTable bsTimeSchedule">' + schedule2 + '<br>' + scheduleComment + '</span></span><span class="bsTimeTable bsTimeDesc"><span class="bsTimeSign">' + headsign2 + '</span>' + vehicleAgency + '<br>' + tripId2[1] + '</span></p>');
+	              
+	            });
+	          });
+
+          //クリックしたバス停を通過するバス系統表示
+          document.getElementById('info').innerHTML = '<h4>' + bstopinfoelements[1] + '</h4>' + uniq(testArray).sort().join('');
+          });
+          cn++;
+        }
+
+        ///////////////////////////////////////////////
+        //リアルタイム車両位置を入力
+        //trip_id引用          
+
+        //車両位置表示
+        setInterval(refreshBusLocation, 5000);
+        
+        function refreshBusLocation() {
+          layerGroupV.clearLayers();
+          var v1 = '';
+          v1 = localStorage.getItem('vehicle');
+          var vehicles1 = [];
+          vehicles1 = JSON.parse(v1);
+          vehicles1.sort();
+          
+          var cr = 0;
+          while (cr < vehicles1.length) {
+            var latBr1 = vehicles1[cr][1];
+            var lngBr1 = vehicles1[cr][2];
+            var vehicle1 = vehicles1[cr][0];
+            var vehicleSign = vehicles1[cr][3]; //系統
+            let vehicleAgency;
+            if (vehicleSign.match(/^1_/) != null) {
+	            vehicleAgency = '<a href="http://www.bus.saga.saga.jp" target="_blank">佐賀市交通局</a>';
+            } else if (vehicleSign.match(/^4_/) != null) {
+	            vehicleAgency = '<a href="http://www.yutoku.jp/jidousya/bus/" target="_blank">祐徳バス株式会社</a>';
+            } else {
+	            vehicleAgency = '<a href="http://showa-bus.jp" target="_blank">昭和自動車株式会社</a>';
+            }
+            
+            var t = vehicles1[cr][4] * 1000;
+            var date = new Date(t);
+            var vehicleCheckTime = date.toString();
+            
+            var busLoc = new Array();
+            var vinfo = new Array();
+
+            //L.marker.options.titleにクリックイベント用のデータをセット
+            vinfo[cr] = vehicleSign + ',' + vehicleCheckTime;
+            
+            busLoc[cr] = L.marker([latBr1, lngBr1],{icon:busIcon, title:vinfo[cr]})
+              .on('click', function(){
+                //バスアイコンをクリックすると、系統から停車バス停が表示される
+                var vinfoelements = this.options.title.split(',');
+                var vlist = new Array();
+                
+                //停車バス停情報
+                vlist = findTripidData(vinfoelements[0]);
+                //console.log(vlist);
+                //console.log(findBSLocationFromStopId(vlist[0][2]));
+                
+                var bsList = new Array();
+                bsList = localStorage.getItem('busstop').split(',');
+                var hSign = '';
+                var cnt = 0;
+                
+                while (cnt < vlist.length) {
+                  //vlist[cnt][3]　標柱id
+                  let arr = new Array();
+                  arr = findBSLocationFromStopId(vlist[cnt][3]);
+                  
+                  if (arr != null) {
+                    var latBs = arr[4];
+                    var lngBs = arr[5];
+                    var hyochu2 = arr[2];
+                    var arrival = vlist[cnt][1];
+                    var arv = arrival.split(':');
+                    var departure = vlist[cnt][2];
+                    var dpt = departure.split(':');
+                    var headsign = vlist[cnt][5];
+
+                    //目的のバス停があれば表示を強調
+                    var iconNumber = L.divIcon({html: '<div>' + (cnt+1) + '</div>', className: 'numIcon', iconSize: [30,30]});
+                    var iconNumber2 = L.divIcon({html: '<div>' + (cnt+1) + '</div>', className: 'numIcon2', iconSize: [30,30]});
+
+                    bsList.forEach(function(el) {
+                      var mk;
+                      if (hyochu2.indexOf(el.replace(/\"/g,'')) < 0) {
+                        mk = L.marker([latBs,lngBs],{icon: iconNumber, zIndexOffset: -1000}).bindPopup("<p>"+ hyochu2 + '<br>' + arv[0] + ':' + arv[1] + '着' + dpt[0] + ':' + dpt[1] + '発</p>');
+                      } else {
+                        mk = L.marker([latBs,lngBs],{icon: iconNumber2, zIndexOffset: -1000}).bindPopup("<p>"+ hyochu2 + '<br>' + arv[0] + ':' + arv[1] + '着' + dpt[0] + ':' + dpt[1] + '発</p>');
+                      }
+                      mk.addTo(layerGroupMk);
+                      hSign = headsign;
+                    });
+                  }
+                  cnt++;
+                }
+
+                document.getElementById('info').innerHTML = '<p>' + hSign + '<br>' + vehicleAgency + '<br>' + vinfoelements[0] + '<br>（最終チェック）' + vinfoelements[1];
+                })
+              .addTo(layerGroupV); //車両
+
+            cr++;
+          }
+        }
+      }
+      
+      setBusLocation();
+    }
+    </script>
+</head>
+<body onload="showMap();">
+	<div id="demo"></div>
+  <div id="realBs"><button class="btnCircle" type="button" onclick="history.back()">戻る</button></div>
+  <div id="map"></div>
+  <div id="info"></div>
+</body>
+</html>

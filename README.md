@@ -67,14 +67,13 @@ Webブラウザでは、仕様のため、現在地取得とアラーム音を�
 
 このアプリの作成にあたり、以下のオープンデータ、オープンソースソフトウェア、フリー素材を使用しました。
 
-- 佐賀県・バス情報オープンデータ
-- OpenTripPlanner
-- Leaflet
-- OpenStreetMap
-- 魔王魂・音素材の一部
-- ニコニ・コモンズ・音素材の一部
-- 小石克様・ナビキャラ画像など
-- 牛島清豪様・バスアイコン
+- [佐賀県・バス情報オープンデータ](http://opendata.sagabus.info/)
+- [OpenTripPlanner](http://www.opentripplanner.org/)
+- [Leaflet](https://leafletjs.com/)
+- [OpenStreetMap](https://www.openstreetmap.org/)
+- [魔王魂](https://maoudamashii.jokersounds.com/)・音素材の一部
+- [ニコニ・コモンズ](https://commons.nicovideo.jp/)・音素材の一部
+- アイコンなどは[Code for Saga](https://code4saga.org/)メンバー作
 
 このアプリの作成にあたり、以下の商用サービス（試用、フリー版、クーポン券）を使用しました。
 

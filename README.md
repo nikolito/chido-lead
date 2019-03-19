@@ -81,7 +81,7 @@ Webブラウザでは、仕様のため、現在地取得とアラーム音を�
 - [OpenStreetMap](https://www.openstreetmap.org/)
 - [魔王魂](https://maoudamashii.jokersounds.com/)・音素材の一部
 - [ニコニ・コモンズ](https://commons.nicovideo.jp/)・音素材の一部
-- アイコンなどは[Code for Saga](https://code4saga.org/)メンバー作
+- ナビキャラ・アプリのタイトル「ちどりーど」は[Code for Saga](https://code4saga.org/)メンバー作（著作権は放棄していません。）
 
 このアプリの作成にあたり、以下の商用サービス（試用、フリー版、クーポン券）を使用しました。
 
@@ -93,4 +93,7 @@ Webブラウザでは、仕様のため、現在地取得とアラーム音を�
 
 このアプリの作成者はチーム酔人@Code for Sagaです。
 プログラム実装者は吉賀@チーム酔人です。
+
+本アプリのアイデアおよびソースコードの著作権は[Code for Saga](https://code4saga.org)に帰属します。
+ただし、このソースコード自体は、[MPL](https://www.mozilla.org/en-US/MPL/2.0/)のもと配布されています。MPLに従えば、どなたでも利用、改変、及び再配布が可能です。
 

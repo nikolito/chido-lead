@@ -1,6 +1,14 @@
 # ちどりーど
 
 ## お知らせ
+ちどりーど実装サイトを変更しました。（2019年3月19日）
+- 旧サイト：https://summer.hori-s.net/
+- 新サイト：https://chido.summarcat.work/
+
+Slideshareで資料を公開しました。
+- 「ちどりーど概要」（UDC2018情熱枠からの復活で入賞）https://www.slideshare.net/natsukoy/ss-136812471
+- ちどりーどが作られた背景「GTFSリアルタイムで変わるバスの世界 - Code for Sagaでのバスオープンデータに対する取り組み」https://www.slideshare.net/natsukoy/gtfs-code-for-saga
+
 解説をQiita記事にしました。
 
 - コンセプト編：https://qiita.com/nikolito/items/8b39f8ec16f28fe2700f
